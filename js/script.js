@@ -38,7 +38,7 @@ window.addEventListener('DOMContentLoaded', () =>{
 
     //Timer
 
-    const deadline = "2021-10-22";
+    const deadline = "2021-10-25";
 
     function getTimeRemaining(){
         const t = Date.parse(deadline) - Date.parse(new Date()),
@@ -81,6 +81,8 @@ window.addEventListener('DOMContentLoaded', () =>{
             hours.innerHTML = setZero(setTime.hours);
             minutes.innerHTML = setZero(setTime.minutes);
             seconds.innerHTML = setZero(setTime.seconds);
+
+           // console.log(setTime.total);
 
             if(setTime.total <= 0){
                 clearInterval(timerId);
@@ -211,4 +213,51 @@ window.addEventListener('DOMContentLoaded', () =>{
         ".menu .container",
         "menu__item"
     ).render();
+
+    //Forms
+
+    const forms = document.querySelectorAll('form');
+
+    const message = {
+        loading: 'Загрузка',
+        success: 'спасибо! Скоро мы с Вами свяжемся.',
+        failure: 'Что-то пошло не так...' 
+    };
+
+    forms.forEach(form => {
+        postData(form);
+    });
+
+    function postData(form){
+        form.addEventListener('submit', (event) =>{
+            event.preventDefault();
+
+            const statusMessage = document.createElement('div');
+            statusMessage.classList.add('status');
+            statusMessage.textContent = message.loading;
+
+            form.append(statusMessage);
+
+            const request = new XMLHttpRequest();
+            request.open('POST', 'server.php');
+
+            //request.setRequestHeader('Content-Type', 'multipart/form-data');
+            const formData = new FormData(form);
+
+            request.send(formData);
+
+            request.addEventListener('load', ()=>{
+                if(request.status === 200){
+                    console.log(request.response);
+                    statusMessage.textContent = message.success;
+                    form.reset();
+                    setTimeout(() => {
+                        statusMessage.remove();
+                    }, 2000);
+                }else{
+                    statusMessage.textContent = message.failure;
+                }
+            });
+        });
+    }
 });
